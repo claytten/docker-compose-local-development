@@ -1,0 +1,74 @@
+version: "3.9"
+
+networks:
+    database:
+        name: database
+
+services:
+    mysql:
+        image: ${MYSQL_CONTAINER:-mysql:latest}
+        container_name: ${MYSQL_CONTAINER_NAME:-mysql}
+        restart: unless-stopped
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-"root"}
+            MYSQL_USER: ${DB_USER:-"root"}
+            MYSQL_PASSWORD: ${DB_PASSWORD:-"root"}
+        ports:
+            - ${FORWARD_MYSQL_PORT:-3306}:3306
+        volumes:
+            - ${MYSQL_CONTAINER_MOUNT:-./database/mysqld}:/var/lib/mysql
+        networks:
+            - database
+
+    postgresql:
+        image: ${POSTGRESQL_CONTAINER:-postgres:latest}
+        container_name: ${POSTGRESQL_CONTAINER_NAME:-postgres}
+        restart: unless-stopped
+        environment:
+            POSTGRES_USER: ${DB_USER:-postgres}
+            POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+            POSTGRES_DB: postgres
+        ports:
+            - ${FORWARD_POSTGRESQL_PORT:-5432}:5432
+        volumes:
+            - ${POSTGRESQL_CONTAINER_MOUNT:-./database/postgres}:/var/lib/postgresql/data
+        networks:
+            - database
+
+    mongo:
+        image: ${MONGO_CONTAINER:-mongo:latest}
+        container_name: ${MONGO_CONTAINER_NAME:-mongo}
+        restart: unless-stopped
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: ${DB_USER:-root}
+            MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD:-root}
+        ports:
+            - ${FORWARD_MONGO_PORT:-27017}:27017
+        volumes:
+            - ${MONGO_CONTAINER_MOUNT:-./database/mongo}:/data/db
+        networks:
+            - database
+
+    redis:
+        image: ${REDIS_CONTAINER:-redis:latest}
+        container_name: ${REDIS_CONTAINER_NAME:-redis}
+        restart: unless-stopped
+        ports:
+            - "${FORWARD_REDIS_PORT:-5379}:6379"
+        volumes:
+            - ${REDIS_CONTAINER_MOUNT:-./database/redis}:/data
+            - ${REDIS_CONTAINER_CONF_MOUNT:-./database/redis/conf}:/redis-stack.conf
+        environment:
+            - REDIS_PASSWORD=${REDIS_PASSWORD:-root}
+        networks:
+            - database
+
+    redisinsight:
+        image: ${REDIS_INSIGHT_CONTAINER:-redislabs/redisinsight:latest}
+        container_name: ${REDIS_INSIGHT_CONTAINER_NAME:-redisinsight}
+        ports:
+            - ${FORWARD_REDIS_INSIGHT_PORT:-8001}:8001
+        volumes:
+            - ${REDIS_INSIGHT_CONTAINER_MOUNT:-./database/redisinsight}:/var/lib/redisinsight
+        networks:
+            - database

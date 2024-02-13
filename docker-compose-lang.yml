@@ -1,0 +1,30 @@
+version: "3.9"
+
+networks:
+    lang:
+        name: lang
+
+services:
+    go:
+        image: ${GOLANG_CONTAINER:-golang:latest}
+        container_name: ${GO_CONTAINER_NAME:-go}
+        restart: unless-stopped
+        stdin_open: true
+        networks:
+            - lang
+
+    php:
+        image: ${PHP_CONTAINER:-php:8.1-cli}
+        container_name: ${PHP_CONTAINER_NAME:-php}
+        restart: unless-stopped
+        stdin_open: true
+        networks:
+            - lang
+
+    composer:
+        image: ${COMPOSER_CONTAINER:-composer:latest}
+        container_name: ${COMPOSER_CONTAINER_NAME:-composer}
+        restart: unless-stopped
+        stdin_open: true
+        networks:
+            - lang
